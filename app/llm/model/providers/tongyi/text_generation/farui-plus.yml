@@ -1,0 +1,55 @@
+#
+# Copyright 2024 Maner·Fan
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+model: farui-plus
+name: farui-plus 通义法睿
+description:
+  default: farui-plus 通义法睿
+  en_us: farui-plus
+type: TEXT_GENERATION
+help:
+  title:
+    default: 通义千问 API 参考文档
+    en_us: Tongyi Qwen API Reference
+  url: https://help.aliyun.com/zh/model-studio/developer-reference/tongyi-farui-api
+features: []
+properties:
+  mode: CHAT
+  context_size: 12000
+parameters:
+  - name: temperature
+    template: temperature
+    initial_value: 1.0
+    field_props:
+      min: 0
+      max: 1.9
+      step: 0.1
+      precision: 1
+  - name: top_p
+    template: top_p
+  - name: presence_penalty
+    template: presence_penalty
+  - name: max_tokens
+    template: max_tokens
+    field_props:
+      min: 1
+      max: 12000
+      step: 10
+      precision: 0
+  - name: response_format
+    template: response_format
+  - name: stop
+    template: stop

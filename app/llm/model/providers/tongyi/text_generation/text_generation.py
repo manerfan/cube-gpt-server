@@ -14,24 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from llm.model.providers.tongyi.chat_models import ChatTongyi
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_openai import ChatOpenAI
 from loguru import logger
 
-from llm.model.entities.models import TextGenerationModel
 from utils.dictionary import (
-    dict_get,
     dict_exclude_keys,
-    dict_map_values,
     dict_filter_none_values,
+    dict_get,
+    dict_map_values,
     dict_merge,
 )
+from llm.model.entities.models import TextGenerationModel
 from utils.errors.llm_error import LLMValidateError
-import openai
 
 
-class OpenAITextGenerationModel(TextGenerationModel):
+class DashScopeTextGenerationModel(TextGenerationModel):
     def chat_model(
         self,
         provider_credential: dict,
@@ -41,30 +40,40 @@ class OpenAITextGenerationModel(TextGenerationModel):
         request_timeout: int = 10,
         max_retries: int = 0,
     ) -> BaseChatModel:
-        # https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+        # https://help.aliyun.com/zh/model-studio/developer-reference/use-qwen-by-calling-api?disableWebsiteRedirect=true#a9b7b197e2q2v
         model_params = dict_map_values(
             model_parameters, lambda k, v: {"type": v} if k == "response_format" else v
         )
 
-        # see langchain_openai.chat_models.base.BaseChatOpenAI
         # langchain对字段有校验，如果model_params中无参数值传none会报错（应该直接不传），这里通过dict给langchain传值
         model_params = dict_filter_none_values(
             {
-                "model": model_name or "gpt-4o",
-                "request_timeout": request_timeout,
+                "model": model_name or "qwen-max",
                 "max_retries": max_retries,
                 "streaming": streaming,
-                "temperature": dict_get(model_params, "temperature"),
-                "max_tokens": dict_get(model_params, "max_tokens"),
                 "stop": dict_get(model_params, "stop"),
                 # 其他模型参数
-                "model_kwargs": dict_exclude_keys(
-                    model_params, ["request_timeout", "max_retries", "streaming", "temperature", "max_tokens", "stop"]
+                "model_kwargs": dict_merge(
+                    dict_exclude_keys(model_params, ["max_retries", "streaming", "stop"]),
+                    {
+                        "request_timeout": request_timeout,
+                        # 在流式输出模式下开启增量输出
+                        "incremental_output": streaming,
+                        # 开启网络搜索
+                        **({
+                            "search_options" : {
+                                "enable_source": True,
+                                "enable_citation": True,
+                                "citation_format": "[^<number>]",
+                                "search_strategy": "standard"
+                            }
+                        } if "enable_search" in model_params and model_parameters["enable_search"] == True else {})
+                    },
                 ),
             }
         )
 
-        return ChatOpenAI(
+        return ChatTongyi(
             # 模型参数
             **model_params,
             # 认证参数
@@ -75,7 +84,7 @@ class OpenAITextGenerationModel(TextGenerationModel):
         self, credentials: dict, model: str | None = None
     ) -> None:
         try:
-            model_name = model or "gpt-4o"
+            model_name = model or "qwen-turbo"
             chat_model = self.chat_model(
                 provider_credential=credentials,
                 model_parameters={"max_tokens": 512},
@@ -93,7 +102,7 @@ class OpenAITextGenerationModel(TextGenerationModel):
                 ]
             )
             logger.info(
-                "OpenAI Credential Validate Success, using model {}, chat result {}",
+                "Tongyi Credential Validate Success, using model {}, chat result {}",
                 model_name,
                 chat_result,
             )

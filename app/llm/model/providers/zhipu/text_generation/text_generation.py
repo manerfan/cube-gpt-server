@@ -53,7 +53,7 @@ class ZhiPuTextGenerationModel(TextGenerationModel):
             chat_result = await chat_model.ainvoke(
                 [
                     SystemMessage(
-                        content="Translate the following from Chinese into English"
+                        content="You are an AI assistant designed to test the API. Your task is to simply return the user's original input verbatim, without any modifications or additional text."
                     ),
                     HumanMessage(content="林中通幽境，深山藏小舍"),
                 ]

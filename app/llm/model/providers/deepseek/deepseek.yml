@@ -14,23 +14,23 @@
 # limitations under the License.
 #
 
-provider: openai
-name: OpenAI
+provider: deepseek
+name: DeepSeek 深度求索
 description:
-  default: OpenAI 提供的模型
-  en_us: Models provided by OpenAI
+  default: DeepSeek 深度求索
+  en_us: Models provided by DeepSeek
 help:
   title:
-    default: 从 OpenAI 获取 API Key
-    en_us: Get your API Key from OpenAI
-  url: https://platform.openai.com/account/api-keys
+    default: 从 DeepSeek 获取 API Key
+    en_us: Get your API Key from DeepSeek
+  url: https://platform.deepseek.com/api_keys
 credential_schemas:
   - name: api_key
     value_type: password
     title:
       default: API Key
     tooltip:
-      default: OpenAI API Key
+      default: DeepSeek API Key
     field_props:
       placeholder:
         default: 在此输入您的 API Key
@@ -40,33 +40,18 @@ credential_schemas:
       required: True
       min: 32
       max: 128
-  - name: organization
-    value_type: text
-    title:
-      default: 组织 ID
-      en_us: Organization ID
-    tooltip:
-      default: 可选，默认为空
-      en_us: Optional, leave blank by default
-    field_props:
-      placeholder:
-        default: 输入你的组织 ID，可选
-        en_us: Enter your organization ID, optional
-      maxLength: 64
-    rules:
-      required: false
   - name: base_url
     value_type: text
     title:
       default: API请求地址
       en_us: API request address
     tooltip:
-      default: 可选，默认 https://api.openai.com/v1，通常URL中需要一个版本号
-      en_us: Optional, default https://api.openai.com/v1, usually URL needs a version number
+      default: 可选，默认 https://api.deepseek.com/v1，通常URL中需要一个版本号，但注意，此处 v1 与模型版本无关
+      en_us: Optional, default https://api.deepseek.com/v1, usually URL needs a version number, but note that v1 here is unrelated to the model version
     field_props:
       placeholder:
-        default: 输入你的API请求地址，默认 https://api.openai.com/v1，通常URL中需要一个版本号
-        en_us: Enter your API request address, default https://api.openai.com/v1, usually URL needs a version number
+        default: 输入你的API请求地址，默认 https://api.deepseek.com/v1，通常URL中需要一个版本号，但注意，此处 v1 与模型版本无关
+        en_us: Enter your API request address, default https://api.deepseek.com/v1, usually URL needs a version number, but note that v1 here is unrelated to the model version
       maxLength: 256
     rules:
       required: false

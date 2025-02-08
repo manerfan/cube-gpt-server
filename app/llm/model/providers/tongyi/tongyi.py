@@ -18,7 +18,7 @@ from llm.model.entities.model import ModelType
 from llm.model.entities.provider import LLMProvider
 
 
-class DashScopeProvider(LLMProvider):
+class TongyiProvider(LLMProvider):
     """
     通义千问
     """

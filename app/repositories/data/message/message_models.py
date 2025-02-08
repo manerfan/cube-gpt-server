@@ -34,16 +34,18 @@ class MessageBlock(BaseModel):
     - system 系统
     """
 
-    content_type: Literal["text", "refer:text", "mention", "error", "system"]
+    content_type: Literal["text", "refer:text", "refer:cards", "think:text", "mention", "error", "system"]
     """
     消息内容的类型
     - text 文本
     - refer:text 引用文本
+    - refer:cards 引用卡片
+    - think:text 思考文本
     - mention 提及
     - error 错误
     """
 
-    content: str | dict
+    content: str | dict | list[str | dict]
     """消息内容"""
 
     section_uid: str
@@ -51,6 +53,13 @@ class MessageBlock(BaseModel):
 
     # 定义配置
     model_config = default_model_config()
+
+class MessageBlockChunk(MessageBlock):
+    """
+    消息块Chunk
+    """
+    is_finished: bool = False
+    """是否结束"""
 
 class SenderInfo(BaseModel):
     """
@@ -95,7 +104,7 @@ class MessageEventData(BaseModel):
     sender_role: Literal["user", "assistant", "system"]
     """发送者角色"""
 
-    message: MessageBlock
+    message: MessageBlockChunk
     """消息内容"""
 
     is_finished: bool

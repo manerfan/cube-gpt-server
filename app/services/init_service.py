@@ -71,8 +71,8 @@ async def initialize(name: str, email: str, password: str):
         await workspace_repository.create(
             Workspace(
                 creator_uid=account.uid,
-                name=f"{name}的默认空间",
-                description=f"{name}的默认空间",
+                name="默认空间",
+                description="个人默认空间",
                 type=WorkspaceType.PRIVATE,
             ),
             session,

@@ -14,24 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from typing import Dict, Optional, Type
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from loguru import logger
 
+from llm.model.providers.deepseek.chat_models import ChatDeepSeek
 from llm.model.entities.models import TextGenerationModel
 from utils.dictionary import (
     dict_get,
     dict_exclude_keys,
-    dict_map_values,
     dict_filter_none_values,
-    dict_merge,
 )
 from utils.errors.llm_error import LLMValidateError
 import openai
 
 
-class OpenAITextGenerationModel(TextGenerationModel):
+class DeepSeekTextGenerationModel(TextGenerationModel):
     def chat_model(
         self,
         provider_credential: dict,
@@ -41,16 +41,14 @@ class OpenAITextGenerationModel(TextGenerationModel):
         request_timeout: int = 10,
         max_retries: int = 0,
     ) -> BaseChatModel:
-        # https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
-        model_params = dict_map_values(
-            model_parameters, lambda k, v: {"type": v} if k == "response_format" else v
-        )
+        # clone
+        model_params = dict(model_parameters)
 
         # see langchain_openai.chat_models.base.BaseChatOpenAI
         # langchain对字段有校验，如果model_params中无参数值传none会报错（应该直接不传），这里通过dict给langchain传值
         model_params = dict_filter_none_values(
             {
-                "model": model_name or "gpt-4o",
+                "model": model_name or "deepseek-chat",
                 "request_timeout": request_timeout,
                 "max_retries": max_retries,
                 "streaming": streaming,
@@ -64,7 +62,7 @@ class OpenAITextGenerationModel(TextGenerationModel):
             }
         )
 
-        return ChatOpenAI(
+        return ChatDeepSeek(
             # 模型参数
             **model_params,
             # 认证参数
@@ -75,7 +73,7 @@ class OpenAITextGenerationModel(TextGenerationModel):
         self, credentials: dict, model: str | None = None
     ) -> None:
         try:
-            model_name = model or "gpt-4o"
+            model_name = model or "deepseek-chat"
             chat_model = self.chat_model(
                 provider_credential=credentials,
                 model_parameters={"max_tokens": 512},
@@ -93,7 +91,7 @@ class OpenAITextGenerationModel(TextGenerationModel):
                 ]
             )
             logger.info(
-                "OpenAI Credential Validate Success, using model {}, chat result {}",
+                "DeepSeek Credential Validate Success, using model {}, chat result {}",
                 model_name,
                 chat_result,
             )

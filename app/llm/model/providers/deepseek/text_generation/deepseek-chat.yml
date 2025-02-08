@@ -1,0 +1,55 @@
+#
+# Copyright 2024 Maner·Fan
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+model: deepseek-chat
+name: deepseek-chat
+description:
+  default: deepseek-chat
+  en_us: deepseek-chat
+type: TEXT_GENERATION
+help:
+  title:
+    default: DeepSeek API 参考文档
+    en_us: DeepSeek API Reference
+  url: https://api-docs.deepseek.com/zh-cn/api/create-chat-completion
+features: []
+properties:
+  mode: chat
+  context_size: 8192
+parameters:
+  - name: temperature
+    template: temperature
+    initial_value: 1.0
+    field_props:
+      min: 0
+      max: 2
+      step: 0.1
+      precision: 1
+  - name: top_p
+    template: top_p
+  - name: presence_penalty
+    template: presence_penalty
+  - name: max_tokens
+    template: max_tokens
+    field_props:
+      min: 1
+      max: 8192
+      step: 10
+      precision: 0
+  - name: response_format
+    template: response_format
+  - name: stop
+    template: stop

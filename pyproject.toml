@@ -15,31 +15,31 @@ python = "^3.13"
 # WEB
 [tool.poetry.group.web.dependencies]
 ## [fastapi](https://fastapi.tiangolo.com/)
-fastapi = { extras = ["all"], version = "^0.115.5" }
+fastapi = { extras = ["all"], version = "^0.115.8" }
 ## [uvloop](https://pypi.org/project/uvloop/)
 uvloop = "^0.21.0"
 ## https://pypi.org/project/uvicorn/
-uvicorn = {extras = ["standard"], version = "^0.32.1"}
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
 ## https://github.com/Kludex/uvicorn-worker
-uvicorn-worker = "^0.2.0"
+uvicorn-worker = "^0.3.0"
 ## https://pypi.org/project/gunicorn/
 gunicorn = "^23.0.0"
 
 # 数据库
 [tool.poetry.group.db.dependencies]
 ## [ORM](https://docs.sqlalchemy.org/en/20/)
-sqlalchemy = { extras = ["asyncio"], version = "^2.0.35" }
+sqlalchemy = { extras = ["asyncio"], version = "^2.0.37" }
 ## [PostgreSQL Adapter](https://www.psycopg.org/)
 asyncpg = "^0.30.0"
 # psycopg2-binary
 ## [数据库版本管理](https://alembic.sqlalchemy.org/en/latest/)
-alembic = "^1.14.0"
+alembic = "^1.14.1"
 
 
 # 缓存
 [tool.poetry.group.cache.dependencies]
 ## [redis](https://aioredis.readthedocs.io/en/latest/)
-redis = "^5.2.0"
+redis = "^5.2.1"
 ## [Memory](https://github.com/Yiling-J/theine)
 # theine
 
@@ -70,13 +70,13 @@ pyyaml = "^6.0.2"
 ## [id生成器ulid](https://python-ulid.readthedocs.io/en/latest/)
 python-ulid = "^3.0.0"
 ## [日志](https://loguru.readthedocs.io/en/stable/)
-loguru = "^0.7.2"
+loguru = "^0.7.3"
 ## [工具大全](https://boltons.readthedocs.io/)
-boltons = "^24.1.0"
+boltons = "^25.0.0"
 ## [Eventbus Blinker](https://blinker.readthedocs.io/)
 blinker = "^1.9.0"
 ## [Local Cache](https://cachetools.readthedocs.io)
-cachetools = "^5.5.0"
+cachetools = "^5.5.1"
 ## [异步文件操作](https://pypi.org/project/aiofiles)
 aiofiles = "^24.1.0"
 
@@ -85,42 +85,42 @@ aiofiles = "^24.1.0"
 [tool.poetry.group.trace.dependencies]
 ## [opentelemetry](https://opentelemetry.io/docs/languages/python/getting-started/)
 ## [ot-fastapi](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation/opentelemetry-instrumentation-fastapi)
-opentelemetry-api = "^1.25.0"
+opentelemetry-api = "^1.30.0"
 opentelemetry-sdk = "^1.25.0"
-opentelemetry-instrumentation = "^0.46b0"
-opentelemetry-instrumentation-fastapi = "^0.46b0"
+opentelemetry-instrumentation = "^0.51b0"
+opentelemetry-instrumentation-fastapi = "^0.51b0"
 
 
 # LLM
 [tool.poetry.group.llm.dependencies]
 ## [LangChain](https://python.langchain.com/docs)
-langchain = "^0.3.14"
-langchain-core = "^0.3.29"
-langchain-community = "^0.3.14"
+langchain = "^0.3.17"
+langchain-core = "^0.3.33"
+langchain-community = "^0.3.16"
 langchain-experimental = "^0.3.4"
 ## trace
-langgraph = "^0.2.60"
-langfuse = "^2.57.4"
+langgraph = "^0.2.69"
+langfuse = "^2.58.2"
 ## [OpenAI]
-langchain-openai = "^0.2.14"
+langchain-openai = "^0.3.3"
 ## [阿里云dashscope]
-dashscope = "^1.20.14"
+dashscope = "^1.22.1"
 ## [百度千帆]
 qianfan = "^0.4.12.2"
 ## [智普清言]
-zhipuai = "^2.1.5.20241204"
+zhipuai = "^2.1.5.20250106"
 
 
 # 测试
 [tool.poetry.group.dev.dependencies]
 ## [pytest](https://docs.pytest.org/en/latest/)
 pytest = "^8.3.4"
-pytest-asyncio = "^0.25.2"
+pytest-asyncio = "^0.25.3"
 ## [pytest-html](https://pytest-html.readthedocs.io/en/latest/)
 ## add arguments: --html=/some-dir/some-file.html
 pytest-html = "^4.1.1"
 ## [httpx](https://www.python-httpx.org/)
-httpx = "^0.28.0"
+httpx = "^0.28.1"
 
 
 [build-system]

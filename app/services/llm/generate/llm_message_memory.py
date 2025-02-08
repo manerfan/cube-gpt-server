@@ -292,3 +292,40 @@ class ConversationSummaryBufferMemory:
 
         # TODO 其他类型的支持
         return None
+    
+    @staticmethod
+    def interleave_messages(messages: list[BaseMessage]) -> list[BaseMessage]:
+        """
+        处理连续的HumanMessage和AIMessage,只保留最后一个
+        """
+        processed_messages = []
+        last_message_type = None
+        temp_message = None
+        
+        for message in messages:
+            current_type = "human" if isinstance(message, HumanMessage) else "ai" if isinstance(message, AIMessage) else "other"
+            
+            if current_type == "other":
+                # 如果有暂存消息,先添加暂存的
+                if temp_message:
+                    processed_messages.append(temp_message)
+                    temp_message = None
+                processed_messages.append(message)
+                last_message_type = current_type
+                continue
+                
+            # 如果类型相同,更新暂存消息
+            if current_type == last_message_type:
+                temp_message = message
+            else:
+                # 如果有暂存消息,添加暂存的
+                if temp_message:
+                    processed_messages.append(temp_message)
+                temp_message = message
+                last_message_type = current_type
+                
+        # 处理最后一个暂存的消息
+        if temp_message:
+            processed_messages.append(temp_message)
+            
+        return processed_messages

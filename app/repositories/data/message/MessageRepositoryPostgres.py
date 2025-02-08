@@ -96,6 +96,7 @@ class MessageRepositoryPostgres(MessageRepository):
         stmt = (
             stmt.where(MessagePO.is_deleted == False)
             .order_by(MessagePO.message_time.desc())
+            .order_by(MessagePO.created_at.desc())
             .limit(latest_count)
         )
 
@@ -134,6 +135,7 @@ class MessageRepositoryPostgres(MessageRepository):
         stmt = (
             stmt.where(MessagePO.is_deleted == False)
             .order_by(MessagePO.message_time.desc())
+            .order_by(MessagePO.created_at.desc())
             .limit(max_count)
         )
 
@@ -182,6 +184,7 @@ class MessageRepositoryPostgres(MessageRepository):
         stmt = (
             stmt.where(MessagePO.is_deleted == False)
             .order_by(MessagePO.message_time.desc())
+            .order_by(MessagePO.created_at.desc())
             .limit(max_count)
         )
 
@@ -227,7 +230,7 @@ class MessageRepositoryPostgres(MessageRepository):
             ).scalar_subquery()
             stmt = stmt.where(MessagePO.message_time > reset_message_uid_subquery)
 
-        stmt = stmt.order_by(MessagePO.message_time.desc()).limit(max_count)
+        stmt = stmt.order_by(MessagePO.message_time.desc()).order_by(MessagePO.created_at.desc()).limit(max_count)
         select_result = await session.execute(stmt)
         return [
             Message(**message.as_dict(alias_mapping=_alias_mapping))

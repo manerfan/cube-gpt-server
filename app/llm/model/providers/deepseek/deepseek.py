@@ -18,9 +18,9 @@ from llm.model.entities.model import ModelType
 from llm.model.entities.provider import LLMProvider
 
 
-class QianFanProvider(LLMProvider):
+class DeepSeekProvider(LLMProvider):
     """
-    文心一言
+    DeepSeek
     """
 
     async def validate_credentials(self, credentials: dict) -> None:

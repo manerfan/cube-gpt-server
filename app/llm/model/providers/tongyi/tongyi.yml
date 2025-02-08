@@ -14,15 +14,10 @@
 # limitations under the License.
 #
 
-provider: dashscope
-name: 阿里云灵积
+provider: tongyi
+name: 通义千问
 description:
-  default: 阿里云灵积模型服务
-icon:
-  icon: /providers/dashscope/icon.svg
-  avatar: /providers/dashscope/avatar.svg
-  combine: /providers/dashscope/combine.svg
-  color: '#615ced'
+  default: 阿里云通义千问
 help:
   title:
     default: 从 阿里云 获取 API Key

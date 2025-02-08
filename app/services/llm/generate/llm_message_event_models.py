@@ -15,10 +15,11 @@ limitations under the License.
 """
 
 from enum import Enum
-from typing import Any
+from typing import Any, Union
 
 from pydantic import BaseModel
 from ulid import ULID
+from langchain_core.messages import BaseMessage
 
 from utils.pydantic import default_model_config
 
@@ -32,6 +33,9 @@ class Event(str, Enum):
 
     AI_MESSAGE_CHUNK = "AI_MESSAGE_CHUNK"
     """AI消息分块"""
+
+    AI_THINKING_CHUNK = "AI_THINKING_CHUNK"
+    """AI思考分块"""
 
     STOP = "STOP"
     """停止"""
@@ -97,5 +101,28 @@ class AIMessageChunkEvent(MessageEvent):
 
     event: Event = Event.AI_MESSAGE_CHUNK
 
-    chunk: Any
-    """langchain AIMessageChunk"""
+    chunk: Union[str, list[Union[str, dict]]]
+    """AI消息分块"""
+
+class AIThinkingChunkEvent(MessageEvent):
+    """
+    AI思考分块事件
+    """
+
+    event: Event = Event.AI_MESSAGE_CHUNK
+
+    thinking: bool = True
+    """AI是否正在思考"""
+
+    chunk: Union[str, list[Union[str, dict]]]
+    """AI思考分块"""
+
+class AIReferCardsChunkEvent(MessageEvent):
+    """
+    引用卡片分块事件
+    """
+
+    event: Event = Event.AI_MESSAGE_CHUNK
+
+    chunk: list[dict]
+    """引用卡片分块"""

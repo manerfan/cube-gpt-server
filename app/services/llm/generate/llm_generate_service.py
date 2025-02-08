@@ -41,6 +41,7 @@ from repositories.data.database import BasePO
 from repositories.data.message.conversation_models import Conversation
 from repositories.data.message.message_models import (
     MessageBlock,
+    MessageBlockChunk,
     MessageEventData,
     Message,
     SenderInfo,
@@ -48,6 +49,8 @@ from repositories.data.message.message_models import (
 from services.llm import llm_model_service, llm_provider_service
 from services.llm.generate.llm_message_checkpoint import LLMMessageCheckPointSaver
 from services.llm.generate.llm_message_event_models import (
+    AIReferCardsChunkEvent,
+    AIThinkingChunkEvent,
     MessageStartEvent,
     MessageEndEvent,
     ErrorEvent,
@@ -94,7 +97,7 @@ class Query(BaseModel):
 class Mention(BaseModel):
     uid: str
     """uid"""
-    
+
     name: str
     """名称"""
 
@@ -206,37 +209,44 @@ async def generate(
     summary_buffer_messages = await memory.get_summary_buffer_messages(
         to_langchain=True
     )
+    summary_buffer_messages = ConversationSummaryBufferMemory.interleave_messages(
+        summary_buffer_messages
+    )
 
     # 存储 user message
-    question_messages = [ # @BOT
-        MessageBlock(
-            type="question",
-            content_type="mention",
-            content={
-                "uid": mention.uid,
-                "name": mention.name,
-                "avatar": mention.avatar,
-            },
-            section_uid=BasePO.uid_generate(),
-        )
-        for mention in chat_generate_cmd.mentions
-    ] +[  # 引用
-        MessageBlock(
-            type="question",
-            content_type=f"refer:{_refer.type}",
-            content=_refer.content,
-            section_uid=BasePO.uid_generate(),
-        )
-        for _refer in chat_generate_cmd.query.refers
-    ] +[  # 消息
-        MessageBlock(
-            type="question",
-            content_type=_input.type,
-            content=_input.content,
-            section_uid=BasePO.uid_generate(),
-        )
-        for _input in chat_generate_cmd.query.inputs
-    ]
+    question_messages = (
+        [  # @BOT
+            MessageBlock(
+                type="question",
+                content_type="mention",
+                content={
+                    "uid": mention.uid,
+                    "name": mention.name,
+                    "avatar": mention.avatar,
+                },
+                section_uid=BasePO.uid_generate(),
+            )
+            for mention in chat_generate_cmd.mentions
+        ]
+        + [  # 引用
+            MessageBlock(
+                type="question",
+                content_type=f"refer:{_refer.type}",
+                content=_refer.content,
+                section_uid=BasePO.uid_generate(),
+            )
+            for _refer in chat_generate_cmd.query.refers
+        ]
+        + [  # 消息
+            MessageBlock(
+                type="question",
+                content_type=_input.type,
+                content=_input.content,
+                section_uid=BasePO.uid_generate(),
+            )
+            for _input in chat_generate_cmd.query.inputs
+        ]
+    )
     user_message = Message(
         conversation_uid=conversation.conversation_uid,
         sender_uid=current_user.uid,
@@ -345,8 +355,8 @@ async def _make_graph_bot(
                 model_parameters=dict_get(model_config, "model_parameters"),
                 model_name=dict_get(model_config, "model_name"),
                 streaming=True,
-                request_timeout=5,
-                max_retries=0,
+                request_timeout=30,
+                max_retries=3,
             )
             if model
             else None
@@ -380,8 +390,8 @@ async def _make_graph_bot(
                 model_parameters=model_config.model_parameters,
                 model_name=model_config.model_name,
                 streaming=True,
-                request_timeout=5,
-                max_retries=0,
+                request_timeout=10,
+                max_retries=3,
             )
             if model
             else None
@@ -471,14 +481,49 @@ async def llm_stream_events(
     """
 
     section_uid = str(ULID())
+    pre_type = None
+
     try:
         async for event in event_iter:
-            logger.debug(event)
+            # logger.debug(event)
             if event["event"] == "on_chat_model_stream":
-                chunk_event = AIMessageChunkEvent(
-                    section_uid=section_uid, chunk=event["data"]["chunk"]
-                )
-                yield chunk_event
+                chunk = event["data"]["chunk"]
+
+                # 判断当前类型
+                if hasattr(chunk, "additional_kwargs") and ("reasoning_content" in chunk.additional_kwargs) and chunk.additional_kwargs["reasoning_content"]:
+                    current_type = "reasoning_content"
+                elif hasattr(chunk, "content") and chunk.content:
+                    current_type = "content"
+                else:
+                    current_type = "other"
+
+                # 类型发生变化时需要重置section_uid，开启新的section
+                if pre_type != current_type:
+                    if pre_type == "reasoning_content":
+                        yield AIThinkingChunkEvent(
+                            section_uid=section_uid, thinking=False, chunk=""
+                        )
+
+                    section_uid = str(ULID())
+                    pre_type = current_type
+
+                # 根据不同的类型返回不同的Event
+                if current_type == "content":
+                    yield AIMessageChunkEvent(
+                        section_uid=section_uid, chunk=chunk.content
+                    )
+                elif current_type == "reasoning_content":
+                    yield AIThinkingChunkEvent(
+                        section_uid=section_uid, chunk=chunk.additional_kwargs["reasoning_content"]
+                    )
+
+                # refers 可能与 content 一起出现
+                if hasattr(chunk, "additional_kwargs") and ("refers" in chunk.additional_kwargs) and chunk.additional_kwargs["refers"]:
+                    section_uid = str(ULID())
+                    yield AIReferCardsChunkEvent(
+                        section_uid=section_uid, chunk=chunk.additional_kwargs["refers"]
+                    )
+
             # TODO 其他类型判断
     except Exception as e:
         logger.exception(f"invoke llm stream error: {str(e)}")
@@ -515,11 +560,12 @@ async def message_events_checkpoint(
                 sender_role="system",
                 message_uid=BasePO.uid_generate(),
                 message_time=int(datetime.now().timestamp()) * 1000,
-                message=MessageBlock(
+                message=MessageBlockChunk(
                     type="system",
                     content_type="text",
                     content="用户终止了生成",
                     section_uid=BasePO.uid_generate(),
+                    is_finished=True,
                 ),
                 is_finished=True,
             )
@@ -548,7 +594,7 @@ async def message_events_checkpoint(
                 ),
                 message_uid=message_uid,
                 message_time=int(datetime.now().timestamp()) * 1000,
-                message=MessageBlock(
+                message=MessageBlockChunk(
                     type="answer",
                     content_type="text",
                     content="",
@@ -565,11 +611,51 @@ async def message_events_checkpoint(
                 sender_role="assistant",
                 message_uid=message_uid,
                 message_time=int(datetime.now().timestamp()) * 1000,
-                message=MessageBlock(
+                message=MessageBlockChunk(
                     type="answer",
                     content_type="text",
-                    content=event.chunk.content,
+                    content=event.chunk,
                     section_uid=event.section_uid,
+                ),
+                is_finished=False,
+            )
+            checkpoint_saver.process(message)
+            yield f"event: message\ndata: {message.model_dump_json()}\n\n"
+
+        if isinstance(event, AIThinkingChunkEvent):
+            message = MessageEventData(
+                conversation_uid=conversation.conversation_uid,
+                sender_uid=assistant_uid,
+                sender_role="assistant",
+                message_uid=message_uid,
+                message_time=int(datetime.now().timestamp()) * 1000,
+                message=MessageBlockChunk(
+                    type="answer",
+                    content_type="think:text",
+                    content=event.chunk,
+                    section_uid=event.section_uid,
+                    is_finished=not event.thinking,
+                ),
+                is_finished=False,
+            )
+            checkpoint_saver.process(message)
+            logger.debug(message)
+            logger.debug(event)
+            yield f"event: message\ndata: {message.model_dump_json()}\n\n"
+
+        if isinstance(event, AIReferCardsChunkEvent):
+            message = MessageEventData(
+                conversation_uid=conversation.conversation_uid,
+                sender_uid=assistant_uid,
+                sender_role="assistant",
+                message_uid=message_uid,
+                message_time=int(datetime.now().timestamp()) * 1000,
+                message=MessageBlockChunk(
+                    type="answer",
+                    content_type="refer:cards",
+                    content=event.chunk,
+                    section_uid=event.section_uid,
+                    is_finished=True,
                 ),
                 is_finished=False,
             )
@@ -589,11 +675,16 @@ async def message_events_checkpoint(
                 sender_role="assistant",
                 message_uid=message_uid,
                 message_time=int(datetime.now().timestamp()) * 1000,
-                message=MessageBlock(
+                message=MessageBlockChunk(
                     type="answer",
                     content_type="error",
-                    content=str(event.error),
+                    content=(
+                        str(event.error)
+                        if str(event.error)
+                        else f"异常: {event.error.__class__.__name__}"
+                    ),
                     section_uid=event.section_uid,
+                    is_finished=True,
                 ),
                 is_finished=True,
             )

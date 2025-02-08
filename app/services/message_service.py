@@ -71,7 +71,7 @@ async def messages(
             message.sender_info = SenderInfo(
                 uid=account.uid,
                 name=account.name,
-                avatar=account.avatar,
+                avatar=getattr(account, "avatar_url", None),
                 role="user",
             )
 
