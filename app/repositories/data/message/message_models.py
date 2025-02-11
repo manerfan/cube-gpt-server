@@ -34,13 +34,13 @@ class MessageBlock(BaseModel):
     - system 系统
     """
 
-    content_type: Literal["text", "refer:text", "refer:cards", "think:text", "mention", "error", "system"]
+    content_type: Literal["text", "refer:text", "refer:cards", "reasoning:text", "mention", "error", "system"]
     """
     消息内容的类型
     - text 文本
     - refer:text 引用文本
     - refer:cards 引用卡片
-    - think:text 思考文本
+    - reasoning:text 推理文本
     - mention 提及
     - error 错误
     """

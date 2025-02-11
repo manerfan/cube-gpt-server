@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage
 from langchain_openai import ChatOpenAI
 from loguru import logger
 
@@ -99,3 +99,12 @@ class OpenAITextGenerationModel(TextGenerationModel):
             )
         except Exception as e:
             raise LLMValidateError(f"认证异常: {e}")
+
+    def before_invoke(self, messages: list[BaseMessage], model_name: str) -> tuple[list[BaseMessage], dict]:
+        if model_name.startswith("o"):
+            # o1 之后的模型不再使用system，使用developer替代
+            for message in messages:
+                if isinstance(message, SystemMessage):
+                    # see _convert_message_to_dict
+                    message.additional_kwargs = {**message.additional_kwargs, "__openai_role__": "developer"}
+        return (messages, {})

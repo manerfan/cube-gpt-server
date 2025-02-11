@@ -34,8 +34,8 @@ class Event(str, Enum):
     AI_MESSAGE_CHUNK = "AI_MESSAGE_CHUNK"
     """AI消息分块"""
 
-    AI_THINKING_CHUNK = "AI_THINKING_CHUNK"
-    """AI思考分块"""
+    AI_REASONING_CHUNK = "AI_REASONING_CHUNK"
+    """AI推理分块"""
 
     STOP = "STOP"
     """停止"""
@@ -104,18 +104,18 @@ class AIMessageChunkEvent(MessageEvent):
     chunk: Union[str, list[Union[str, dict]]]
     """AI消息分块"""
 
-class AIThinkingChunkEvent(MessageEvent):
+class AIReasoningChunkEvent(MessageEvent):
     """
-    AI思考分块事件
+    AI推理分块事件
     """
 
     event: Event = Event.AI_MESSAGE_CHUNK
 
-    thinking: bool = True
-    """AI是否正在思考"""
+    reasoning: bool = True
+    """AI是否正在推理"""
 
     chunk: Union[str, list[Union[str, dict]]]
-    """AI思考分块"""
+    """AI推理分块"""
 
 class AIReferCardsChunkEvent(MessageEvent):
     """

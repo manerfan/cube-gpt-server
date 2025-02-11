@@ -17,6 +17,7 @@ limitations under the License.
 from abc import ABC, abstractmethod
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage
 
 from llm.model.entities.commons import I18nOption
 from llm.model.entities.model import LLMModel, ModelType
@@ -56,3 +57,11 @@ class TextGenerationModel(LLMModel, ABC):
         :return: BaseChatModel
         """
         raise NotImplementedError()
+    
+    def before_invoke(self, messages: list[BaseMessage], model_name: str) -> tuple[list[BaseMessage], dict]:
+        """
+        调用前处理
+        :param messages: 消息列表
+        :return: 处理后的消息列表, 额外参数
+        """
+        return (messages, {})

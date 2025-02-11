@@ -37,7 +37,7 @@ parameters:
     template: top_p
   - name: presence_penalty
     template: presence_penalty
-  - name: max_tokens
+  - name: max_completion_tokens
     template: max_tokens
     field_props:
       min: 1

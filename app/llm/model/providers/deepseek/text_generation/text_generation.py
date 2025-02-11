@@ -73,7 +73,8 @@ class DeepSeekTextGenerationModel(TextGenerationModel):
         self, credentials: dict, model: str | None = None
     ) -> None:
         try:
-            model_name = model or "deepseek-chat"
+            api_base = dict_get(credentials, "api_base", "")
+            model_name = model or ("deepseek-chat" if not api_base or "api.deepseek.com" in api_base else "deepseek-v3" )
             chat_model = self.chat_model(
                 provider_credential=credentials,
                 model_parameters={"max_tokens": 512},

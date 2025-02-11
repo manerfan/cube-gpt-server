@@ -28,7 +28,7 @@ help:
 features: []
 properties:
   mode: chat
-  context_size: 8192
+  context_size: 57344
 parameters:
   - name: temperature
     template: temperature
@@ -46,7 +46,7 @@ parameters:
     template: max_tokens
     field_props:
       min: 1
-      max: 8192
+      max: 57344
       step: 10
       precision: 0
   - name: response_format

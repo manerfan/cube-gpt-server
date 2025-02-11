@@ -50,7 +50,7 @@ from services.llm import llm_model_service, llm_provider_service
 from services.llm.generate.llm_message_checkpoint import LLMMessageCheckPointSaver
 from services.llm.generate.llm_message_event_models import (
     AIReferCardsChunkEvent,
-    AIThinkingChunkEvent,
+    AIReasoningChunkEvent,
     MessageStartEvent,
     MessageEndEvent,
     ErrorEvent,
@@ -410,8 +410,9 @@ async def _make_graph_bot(
                 content=f"{system_message.content}\n\n{messages[0].content}"
             )
             messages = messages[1:]
+        invoke_messages, additional_kwargs = model.before_invoke([system_message] + messages, dict_get(model_config, "model_name"))
         response = await chat_model.ainvoke(
-            [system_message] + messages, dict_merge(config, {"tags": ["explain_tag"]})
+            invoke_messages, dict_merge(config, {"tags": ["explain_tag"]}, **additional_kwargs)
         )
         return {"messages": response}
 
@@ -485,7 +486,7 @@ async def llm_stream_events(
 
     try:
         async for event in event_iter:
-            # logger.debug(event)
+            logger.info(event)
             if event["event"] == "on_chat_model_stream":
                 chunk = event["data"]["chunk"]
 
@@ -496,12 +497,13 @@ async def llm_stream_events(
                     current_type = "content"
                 else:
                     current_type = "other"
+                    continue
 
                 # 类型发生变化时需要重置section_uid，开启新的section
                 if pre_type != current_type:
                     if pre_type == "reasoning_content":
-                        yield AIThinkingChunkEvent(
-                            section_uid=section_uid, thinking=False, chunk=""
+                        yield AIReasoningChunkEvent(
+                            section_uid=section_uid, reasoning=False, chunk=""
                         )
 
                     section_uid = str(ULID())
@@ -513,7 +515,7 @@ async def llm_stream_events(
                         section_uid=section_uid, chunk=chunk.content
                     )
                 elif current_type == "reasoning_content":
-                    yield AIThinkingChunkEvent(
+                    yield AIReasoningChunkEvent(
                         section_uid=section_uid, chunk=chunk.additional_kwargs["reasoning_content"]
                     )
 
@@ -622,7 +624,7 @@ async def message_events_checkpoint(
             checkpoint_saver.process(message)
             yield f"event: message\ndata: {message.model_dump_json()}\n\n"
 
-        if isinstance(event, AIThinkingChunkEvent):
+        if isinstance(event, AIReasoningChunkEvent):
             message = MessageEventData(
                 conversation_uid=conversation.conversation_uid,
                 sender_uid=assistant_uid,
@@ -631,16 +633,16 @@ async def message_events_checkpoint(
                 message_time=int(datetime.now().timestamp()) * 1000,
                 message=MessageBlockChunk(
                     type="answer",
-                    content_type="think:text",
+                    content_type="reasoning:text",
                     content=event.chunk,
                     section_uid=event.section_uid,
-                    is_finished=not event.thinking,
+                    is_finished=not event.reasoning,
                 ),
                 is_finished=False,
             )
             checkpoint_saver.process(message)
-            logger.debug(message)
-            logger.debug(event)
+            # logger.debug(message)
+            # logger.debug(event)
             yield f"event: message\ndata: {message.model_dump_json()}\n\n"
 
         if isinstance(event, AIReferCardsChunkEvent):

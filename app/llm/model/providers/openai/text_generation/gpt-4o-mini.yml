@@ -14,21 +14,22 @@
 # limitations under the License.
 #
 
-model: gpt-4
-name: gpt-4
+model: gpt-4o-mini
+name: gpt-4o-mini
 description:
-  default: gpt-4
-  en_us: gpt-4
+  default: gpt-4o-mini
+  en_us: gpt-4o-mini
 type: TEXT_GENERATION
 help:
   title:
     default: OpenAI API 参考文档
     en_us: OpenAI API Reference
   url: https://platform.openai.com/docs/api-reference/chat
-features: []
+features:
+  - VISION
 properties:
-  mode: chat
-  context_size: 8192
+  mode: CHAT
+  context_size: 128000
 parameters:
   - name: temperature
     template: temperature
@@ -40,8 +41,10 @@ parameters:
     template: max_tokens
     field_props:
       min: 1
-      max: 8192
+      max: 128000
       step: 10
       precision: 0
   - name: response_format
     template: response_format
+  - name: stop
+    template: stop

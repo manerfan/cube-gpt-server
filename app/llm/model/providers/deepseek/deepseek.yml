@@ -40,7 +40,7 @@ credential_schemas:
       required: True
       min: 32
       max: 128
-  - name: base_url
+  - name: api_base
     value_type: text
     title:
       default: API请求地址

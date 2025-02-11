@@ -14,21 +14,22 @@
 # limitations under the License.
 #
 
-model: gpt-4
-name: gpt-4
+model: o1
+name: o1
 description:
-  default: gpt-4
-  en_us: gpt-4
+  default: o1
+  en_us: o1
 type: TEXT_GENERATION
 help:
   title:
     default: OpenAI API 参考文档
     en_us: OpenAI API Reference
   url: https://platform.openai.com/docs/api-reference/chat
-features: []
+features:
+  - VISION
 properties:
-  mode: chat
-  context_size: 8192
+  mode: CHAT
+  context_size: 200000
 parameters:
   - name: temperature
     template: temperature
@@ -40,8 +41,34 @@ parameters:
     template: max_tokens
     field_props:
       min: 1
-      max: 8192
+      max: 200000
       step: 10
       precision: 0
   - name: response_format
     template: response_format
+  - name: stop
+    template: stop
+  - name: reasoning_effort
+    value_type: select
+    initial_value: medium
+    title:
+      default: 推理力度
+      en_us: reasoning effort
+    tooltip:
+      default: 推理模型的推理力度。
+      en_us: Constrains effort on reasoning for reasoning models.
+    value_enum:
+      - value: low
+        text:
+          default: 低
+          en_us: Low
+      - value: medium
+        text:
+          default: 中
+          en_us: Medium
+      - value: high
+        text:
+          default: 高
+          en_us: High
+    rules:
+      required: false

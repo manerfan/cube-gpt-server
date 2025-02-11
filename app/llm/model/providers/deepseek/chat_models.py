@@ -214,6 +214,7 @@ class ChatDeepSeek(BaseChatOpenAI):
 
     @model_validator(mode="after")
     def validate_environment(self) -> Self:
+        self.api_base = self.api_base or from_env("DEEPSEEK_API_BASE", default=DEFAULT_API_BASE)()
         if self.api_base == DEFAULT_API_BASE and not (
             self.api_key and self.api_key.get_secret_value()
         ):
