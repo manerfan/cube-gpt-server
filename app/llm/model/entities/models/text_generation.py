@@ -17,7 +17,7 @@ limitations under the License.
 from abc import ABC, abstractmethod
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, SystemMessage
 
 from llm.model.entities.commons import I18nOption
 from llm.model.entities.model import LLMModel, ModelType
@@ -64,4 +64,6 @@ class TextGenerationModel(LLMModel, ABC):
         :param messages: 消息列表
         :return: 处理后的消息列表, 额外参数
         """
-        return (messages, {})
+        # 将空内容的 SystemMessage 过滤掉
+        filtered_messages = [msg for msg in messages if not (isinstance(msg, SystemMessage) and not msg.content)]
+        return (filtered_messages, {})
