@@ -35,7 +35,7 @@ from services import bot_service
 from llm.model import model_provider_factory
 from llm.model.entities.model import ModelType
 from llm.model.entities.models import TextGenerationModel
-from repositories.data import conversation_repository, message_repository
+from repositories.data import conversation_repository, message_repository, message_summary_repository
 from repositories.data.account.account_models import Account
 from repositories.data.database import BasePO
 from repositories.data.message.conversation_models import Conversation
@@ -169,6 +169,9 @@ async def clear_memory(current_user: Account, conversation_uid: str) -> list[Mes
     await conversation_repository.update_reset_message_uid(
         conversation_uid, reset_message.message_uid
     )
+
+    # 清除消息总结
+    await message_summary_repository.disable_all(conversation_uid)
 
     return [reset_message]
 

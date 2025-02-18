@@ -16,7 +16,7 @@ limitations under the License.
 
 from typing import Dict
 
-from sqlalchemy import PrimaryKeyConstraint, String, BIGINT, TypeDecorator, TEXT, func
+from sqlalchemy import PrimaryKeyConstraint, String, BIGINT, TypeDecorator, TEXT, func, update
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -280,6 +280,17 @@ class MessageSummaryRepositoryPostgres(MessageSummaryRepository):
         message_summary_po = MessageSummaryPO(**vars(message_summary))
         session.add(message_summary_po)
         return message_summary
+    
+    @with_async_session
+    async def disable_all(self, conversation_uid: str, session: AsyncSession) -> bool:
+        stmt = (
+            update(MessageSummaryPO)
+            .where(MessageSummaryPO.conversation_uid == conversation_uid)
+            .where(MessageSummaryPO.is_deleted == False)
+            .values(is_deleted=True)
+        )
+        await session.execute(stmt)
+        return True
 
     @with_async_session
     async def get_latest(

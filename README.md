@@ -8,8 +8,8 @@
 
 ### 创建环境
 ```shell
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 ### 安装依赖

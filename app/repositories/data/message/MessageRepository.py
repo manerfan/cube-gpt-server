@@ -164,9 +164,16 @@ class MessageSummaryRepository(Repository):
         :param session: Session
         """
         raise NotImplementedError()
+    
+    @abstractmethod
+    async def disable_all(self, conversation_uid: str, session: AsyncSession) -> bool:
+        """
+        禁用所有会话消息总结
+        """
+        raise NotImplementedError()
 
     @abstractmethod
-    async def get_latest(self, conversation_uid: str) -> MessageSummary:
+    async def get_latest(self, conversation_uid: str, session: AsyncSession) -> MessageSummary:
         """
         获取最新的会话消息总结
         :param conversation_uid: 会话 ID
