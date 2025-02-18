@@ -263,7 +263,7 @@ CREATE TABLE modu_files
     created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP(0)   NOT NULL,
     updated_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP(0)   NOT NULL,
     uid                 VARCHAR(64)                                             NOT NULL,
-    file_key            VARCHAR(32)                                             NOT NULL,
+    file_key            VARCHAR(64)                                             NOT NULL,
     filename            VARCHAR(256)                                            NOT NULL,
     file_mime_type      VARCHAR(128)                                            NOT NULL,
     file_category       VARCHAR(64)                                             NOT NULL,

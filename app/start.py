@@ -14,19 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import platform
+
 if __name__ == "__main__":
     """
     本地开发使用 python start.py
     生产请使用 Gunicorn 进行部署
     gunicorn -w 4 -k uvicorn_tools.ModuUvicornWorker --bind 0.0.0.0:8080 main:app
     """
-    import uvicorn
-    import uvicorn_tools
+    if platform.system() == "Windows":
+        import uvicorn
 
-    uvicorn.run(
-        "main:app",
-        reload=True,
-        host="0.0.0.0",
-        port=8080,
-        http=uvicorn_tools.ModuHttpToolsProtocol,
-    )
+        uvicorn.run(
+            "main:app",
+            reload=True,
+            host="0.0.0.0",
+            port=8080,
+        )
+    else:
+        import uvicorn
+        import uvicorn_tools
+
+        uvicorn.run(
+            "main:app",
+            reload=True,
+            host="0.0.0.0",
+            port=8080,
+            http=uvicorn_tools.ModuHttpToolsProtocol,
+        )
