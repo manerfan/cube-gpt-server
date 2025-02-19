@@ -17,7 +17,7 @@ python = "^3.13"
 ## [fastapi](https://fastapi.tiangolo.com/)
 fastapi = { extras = ["all"], version = "^0.115.8" }
 ## [uvloop](https://pypi.org/project/uvloop/)
-uvloop = { version = "^0.21.0", markers = "sys_platform != 'win32'" }
+uvloop = { version = "^0.21.0", markers = "platform_system != 'Windows'" }
 ## https://pypi.org/project/uvicorn/
 uvicorn = {extras = ["standard"], version = "^0.34.0"}
 ## https://github.com/Kludex/uvicorn-worker
